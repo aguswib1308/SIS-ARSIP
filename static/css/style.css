@@ -7,7 +7,13 @@
   --teks:#1c2422;
   --teks-lembut:#5c6b66;
 }
-body{ background:#f6f8f7; color:var(--teks); font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; }
+html{ scroll-behavior:smooth; }
+body{ background:#f6f8f7; color:var(--teks);
+  font-family:"Plus Jakarta Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility; }
+/* angka & data: tabular figures agar rapi sejajar */
+.angka,.kv dd,.table td,.table th,.badge{ font-variant-numeric:tabular-nums; }
+h1,h2,h3,h4{ text-wrap:balance; }
 
 .app-nav{ background:var(--hijau); box-shadow:0 1px 0 rgba(0,0,0,.06); }
 .app-nav .navbar-brand,.app-nav .nav-link{ color:#eef6f2 !important; }
@@ -24,9 +30,11 @@ h1,h2,h3,h4{ color:var(--hijau-tua); letter-spacing:-.01em; }
 .page-head{ display:flex; align-items:center; justify-content:space-between; gap:1rem; margin-bottom:1.25rem; flex-wrap:wrap; }
 .page-head h1{ font-size:1.5rem; margin:0; }
 
-.card{ border:1px solid var(--garis); border-radius:12px; }
-.card-stat{ background:#fff; }
-.card-stat .angka{ font-size:2rem; font-weight:700; color:var(--hijau-tua); line-height:1; }
+.card{ border:1px solid var(--garis); border-radius:12px;
+  box-shadow:0 1px 2px rgba(15,110,82,.04), 0 8px 24px -16px rgba(15,110,82,.18); }
+.card-stat{ background:#fff; transition:transform .2s cubic-bezier(.16,1,.3,1), box-shadow .2s; }
+.card-stat:hover{ transform:translateY(-2px); box-shadow:0 2px 4px rgba(15,110,82,.06), 0 16px 32px -18px rgba(15,110,82,.28); }
+.card-stat .angka{ font-size:2rem; font-weight:700; color:var(--hijau-tua); line-height:1; letter-spacing:-.02em; }
 .card-stat .label{ color:var(--teks-lembut); font-size:.85rem; }
 
 .btn-hijau{ background:var(--hijau); border-color:var(--hijau); color:#fff; }
@@ -74,3 +82,36 @@ a{ color:var(--hijau-tua); }
 .login-card{ background:#fff; border:1px solid var(--garis); border-radius:14px; padding:2rem; }
 .kv{ display:grid; grid-template-columns:170px 1fr; gap:.35rem .75rem; font-size:.9rem; }
 .kv dt{ color:var(--teks-lembut); font-weight:500; }
+
+/* --- Redesign pass: states, a11y, presence --- */
+.btn{ transition:background-color .2s, border-color .2s, transform .08s, box-shadow .2s; }
+.btn-hijau{ box-shadow:0 6px 16px -10px rgba(15,110,82,.6); }
+.btn-hijau:active{ transform:translateY(1px); box-shadow:none; }
+.app-nav .nav-link{ transition:color .15s; }
+.table tbody tr{ transition:background-color .12s; }
+
+/* Focus ring konsisten (keyboard a11y) — hijau, bukan biru default */
+a:focus-visible, .btn:focus-visible, .form-control:focus, .form-select:focus,
+.nav-link:focus-visible, button:focus-visible, summary:focus-visible{
+  outline:none;
+  box-shadow:0 0 0 .2rem rgba(15,110,82,.28);
+  border-color:var(--hijau) !important;
+}
+
+/* Skip-to-content (muncul saat fokus keyboard) */
+.skip-link{ position:absolute; left:.75rem; top:-3rem; z-index:1080;
+  background:var(--hijau); color:#fff; padding:.5rem .9rem; border-radius:8px;
+  transition:top .15s; }
+.skip-link:focus{ top:.75rem; color:#fff; }
+
+/* Latar login: ambient hijau lembut (bukan flat polos) */
+body.login-bg{ background:
+  radial-gradient(60vw 50vh at 85% -5%, rgba(15,110,82,.10), transparent 60%),
+  radial-gradient(40vw 40vh at 0% 100%, rgba(15,110,82,.08), transparent 55%),
+  #f6f8f7; }
+.login-card{ box-shadow:0 1px 2px rgba(15,110,82,.05), 0 24px 60px -30px rgba(10,83,64,.4); }
+
+@media (prefers-reduced-motion: reduce){
+  html{ scroll-behavior:auto; }
+  .card-stat, .btn, .table tbody tr{ transition:none; }
+}
