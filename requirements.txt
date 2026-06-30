@@ -1,0 +1,11 @@
+# Wajib
+Flask>=3.0
+requests>=2.31
+
+# Opsional — ekstraksi teks & OCR (aplikasi tetap jalan tanpa ini; ekstraksi ditandai "tertunda")
+# PyMuPDF>=1.24          # ekstraksi teks PDF digital (cepat)
+# pdfminer.six>=20221105 # alternatif ekstraksi PDF
+# pytesseract>=0.3.10    # OCR (butuh Tesseract OCR terpasang di sistem + bahasa 'ind')
+# pdf2image>=1.17        # render halaman PDF utk OCR (butuh poppler)
+# Pillow>=10.0           # baca gambar utk OCR
+# python-docx>=1.1       # ekstraksi teks .docx

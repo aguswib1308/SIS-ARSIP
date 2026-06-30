@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Asisten AI{% endblock %}
+{% block content %}
+<div class="page-head"><h1><i class="bi bi-robot"></i> Asisten AI Arsip</h1></div>
+<p class="text-muted">Tanyakan apa pun tentang isi arsip peraturan. Jawaban berbasis dokumen yang tersimpan (RAG).
+  {% if not llm_aktif %}<span class="badge bg-secondary">LLM nonaktif — menampilkan kutipan relevan</span>{% endif %}</p>
+
+<form method="post" class="card p-3 mb-3">
+  <div class="input-group">
+    <input name="pertanyaan" class="form-control" value="{{ pertanyaan }}" autofocus
+           placeholder="mis. Apa dasar hukum akad murabahah kami? Kapan izin OSS berakhir?">
+    <button class="btn btn-hijau"><i class="bi bi-send"></i> Tanya</button>
+  </div>
+</form>
+
+{% if hasil %}
+  {% if hasil.jawaban %}
+  <div class="card p-3 mb-3">
+    <h2 style="font-size:1rem;"><i class="bi bi-chat-left-quote"></i> Jawaban</h2>
+    <div style="white-space:pre-wrap;">{{ hasil.jawaban }}</div>
+  </div>
+  {% endif %}
+  {% if hasil.catatan %}<div class="alert alert-info py-2 small">{{ hasil.catatan }}</div>{% endif %}
+
+  {% if hasil.relevan %}
+  <div class="card p-3">
+    <h2 style="font-size:1rem;">Dokumen relevan</h2>
+    {% for r in hasil.relevan %}
+    <div class="snip mb-2">
+      <a href="{{ url_for('dokumen_detail', dok_id=r.id) }}" class="fw-semibold">{{ r.judul }}</a>
+      <span class="text-muted small">· {{ r.nomor or '—' }} {{ r.tahun or '' }} · {{ r.pilar }} · {{ r.status }}</span>
+      {% if r.cuplikan %}<div class="small mt-1">{{ r.cuplikan }}</div>{% endif %}
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+  <p class="disclaimer">Output AI hanya bantuan; bukan nasihat hukum/fatwa final. Verifikasi pada dokumen sumber.</p>
+{% endif %}
+{% endblock %}

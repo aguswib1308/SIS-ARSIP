@@ -1,0 +1,22 @@
+[Unit]
+Description=SIS-ARSIP - Arsip Peraturan BMT Amal Muslim (Flask)
+After=network.target
+
+[Service]
+User=www-data
+Group=www-data
+WorkingDirectory=/var/www/sis-arsip
+# Rahasia (SECRET_KEY, kredensial LLM) dibaca dari file env mode 0600.
+EnvironmentFile=/etc/sis-arsip.env
+ExecStart=/var/www/sis-arsip/venv/bin/gunicorn \
+    --workers 2 \
+    --bind 127.0.0.1:5050 \
+    --timeout 90 \
+    --access-logfile /var/log/sis-arsip/access.log \
+    --error-logfile /var/log/sis-arsip/error.log \
+    app:app
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

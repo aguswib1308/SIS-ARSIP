@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Pengguna{% endblock %}
+{% block content %}
+<div class="page-head"><h1>Kelola Pengguna</h1></div>
+<div class="row g-3">
+  <div class="col-lg-7">
+    <div class="card">
+      <table class="table mb-0 align-middle">
+        <thead class="table-light"><tr><th>Nama</th><th>Username</th><th>Peran</th><th>Aktif</th></tr></thead>
+        <tbody>
+        {% for u in rows %}
+          <tr><td>{{ u.nama }}</td><td>{{ u.username }}</td>
+            <td><span class="role-badge badge bg-secondary text-capitalize">{{ u.peran }}</span></td>
+            <td>{{ 'Ya' if u.aktif else 'Tidak' }}</td></tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="col-lg-5">
+    <div class="card p-3">
+      <h2 style="font-size:1rem;">Tambah pengguna</h2>
+      <form method="post" action="{{ url_for('admin_pengguna_baru') }}">
+        <div class="mb-2"><label class="form-label">Nama</label><input name="nama" class="form-control" required></div>
+        <div class="mb-2"><label class="form-label">Username</label><input name="username" class="form-control" required></div>
+        <div class="mb-2"><label class="form-label">Kata sandi</label><input name="password" type="password" class="form-control" required></div>
+        <div class="mb-3"><label class="form-label">Peran</label>
+          <select name="peran" class="form-select"><option value="pengurus">Pengurus</option>
+            <option value="dps">Pengawas / DPS</option><option value="admin">Admin IT</option></select></div>
+        <button class="btn btn-hijau w-100">Tambah</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

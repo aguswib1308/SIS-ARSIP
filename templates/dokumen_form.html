@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Edit' if dok else 'Dokumen baru' }}{% endblock %}
+{% macro val(k) %}{{ dok[k] if dok and dok[k] is not none else '' }}{% endmacro %}
+{% block content %}
+<div class="page-head"><h1>{{ 'Edit Dokumen' if dok else 'Tambah Dokumen' }}</h1>
+  <a href="{{ url_for('dokumen_detail', dok_id=dok.id) if dok else url_for('dokumen_list') }}" class="btn btn-outline-secondary">Batal</a>
+</div>
+
+<form method="post" enctype="multipart/form-data">
+<div class="row g-3">
+  <div class="col-lg-8">
+    <div class="card p-3 mb-3">
+      <h2 style="font-size:1rem;">Identitas dokumen</h2>
+      <div class="mb-3">
+        <label class="form-label">Judul <span class="text-danger">*</span></label>
+        <input name="judul" class="form-control" required value="{{ val('judul') }}">
+      </div>
+      <div class="row g-2">
+        <div class="col-md-4">
+          <label class="form-label">Pilar <span class="text-danger">*</span></label>
+          <select name="pilar" id="pilar" class="form-select" required>
+            {% for p in ['Syariah','Hukum Positif','Internal'] %}
+            <option {{ 'selected' if dok and dok['pilar']==p }}>{{ p }}</option>{% endfor %}
+          </select>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Level hierarki <span class="text-danger">*</span></label>
+          <select name="level_kode" id="level_kode" class="form-select" required>
+            {% for pilar, lvls in levels.items() %}
+            <optgroup label="{{ pilar }}" data-pilar="{{ pilar }}">
+              {% for l in lvls %}<option value="{{ l.kode }}" data-pilar="{{ pilar }}"
+                 {{ 'selected' if dok and dok['level_kode']==l.kode }}>{{ l.nama }}</option>{% endfor %}
+            </optgroup>{% endfor %}
+          </select>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Entitas <span class="text-danger">*</span></label>
+          <select name="entitas" class="form-select" required>
+            {% for e in ['Baitul Tamwil','Baitul Maal','Umum'] %}
+            <option {{ 'selected' if dok and dok['entitas']==e }}>{{ e }}</option>{% endfor %}
+          </select>
+        </div>
+      </div>
+      <div class="row g-2 mt-1">
+        <div class="col-md-4"><label class="form-label">Otoritas penerbit</label>
+          <input name="otoritas" class="form-control" placeholder="DSN-MUI, Kemenkop, RAT…" value="{{ val('otoritas') }}"></div>
+        <div class="col-md-4"><label class="form-label">Bentuk</label>
+          <input name="bentuk" class="form-control" placeholder="Undang-Undang" value="{{ val('bentuk') }}"></div>
+        <div class="col-md-4"><label class="form-label">Bentuk singkat</label>
+          <input name="bentuk_singkat" class="form-control" placeholder="UU" value="{{ val('bentuk_singkat') }}"></div>
+      </div>
+      <div class="row g-2 mt-1">
+        <div class="col-md-6"><label class="form-label">Nomor</label>
+          <input name="nomor" class="form-control" placeholder="No. 25 Tahun 1992" value="{{ val('nomor') }}"></div>
+        <div class="col-md-3"><label class="form-label">Tahun</label>
+          <input name="tahun" type="number" class="form-control" value="{{ val('tahun') }}"></div>
+        <div class="col-md-3">
+          <label class="form-label">Status</label>
+          <select name="status" class="form-select">
+            {% for s in ['Draf','Berlaku','Diubah','Dicabut','Diganti','Kedaluwarsa'] %}
+            <option {{ 'selected' if dok and dok['status']==s }}>{{ s }}</option>{% endfor %}
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="card p-3 mb-3">
+      <h2 style="font-size:1rem;">Tanggal & klasifikasi</h2>
+      <div class="row g-2">
+        <div class="col-md-4"><label class="form-label">Tgl penetapan</label>
+          <input name="tgl_penetapan" type="date" class="form-control" value="{{ val('tgl_penetapan') }}"></div>
+        <div class="col-md-4"><label class="form-label">Mulai berlaku</label>
+          <input name="tgl_mulai_berlaku" type="date" class="form-control" value="{{ val('tgl_mulai_berlaku') }}"></div>
+        <div class="col-md-4"><label class="form-label">Berakhir <small class="text-muted">(izin)</small></label>
+          <input name="tgl_berakhir" type="date" class="form-control" value="{{ val('tgl_berakhir') }}"></div>
+      </div>
+      <div class="row g-2 mt-1">
+        <div class="col-md-6"><label class="form-label">Bidang hukum</label>
+          <input name="bidang_hukum" class="form-control" value="{{ val('bidang_hukum') }}"></div>
+        <div class="col-md-6"><label class="form-label">Tag <small class="text-muted">(pisah koma)</small></label>
+          <input name="tag" class="form-control" placeholder="akad, murabahah" value="{{ val('tag') }}"></div>
+      </div>
+      <div class="mt-2"><label class="form-label">Sumber</label>
+        <input name="sumber" class="form-control" placeholder="tautan resmi / asal dokumen" value="{{ val('sumber') }}"></div>
+      <div class="mt-2"><label class="form-label">Abstraksi / ringkasan</label>
+        <textarea name="abstraksi" class="form-control" rows="3">{{ val('abstraksi') }}</textarea></div>
+    </div>
+  </div>
+
+  <div class="col-lg-4">
+    <div class="card p-3 mb-3">
+      <h2 style="font-size:1rem;">Lampiran file</h2>
+      <input type="file" name="file" class="form-control" accept=".pdf,.doc,.docx,.png,.jpg,.jpeg,.webp">
+      <p class="text-muted small mt-2 mb-0">PDF/Word/gambar. Setelah diunggah, teks diekstraksi otomatis
+        (OCR untuk hasil scan bila pustaka tersedia) untuk pencarian & analisis AI.
+        Mengunggah lagi membuat versi baru.</p>
+    </div>
+    <div class="card p-3 mb-3">
+      <div class="form-check">
+        <input class="form-check-input" type="checkbox" name="perlu_verifikasi" id="pv"
+               {{ 'checked' if dok and dok['perlu_verifikasi'] }}>
+        <label class="form-check-label" for="pv">Tandai <strong>perlu verifikasi</strong></label>
+      </div>
+      <p class="text-muted small mt-1 mb-0">Centang bila nomor/tahun/isi belum dipastikan.</p>
+    </div>
+    <button class="btn btn-hijau w-100"><i class="bi bi-save"></i> Simpan</button>
+  </div>
+</div>
+</form>
+{% endblock %}
+{% block scripts %}
+<script>
+// Saring opsi level sesuai pilar terpilih.
+const pilarSel = document.getElementById('pilar');
+const levelSel = document.getElementById('level_kode');
+function filterLevel(){
+  const p = pilarSel.value;
+  let pertama = null;
+  for (const g of levelSel.querySelectorAll('optgroup')){
+    const cocok = g.dataset.pilar === p;
+    g.style.display = cocok ? '' : 'none';
+    for (const o of g.querySelectorAll('option')){
+      o.disabled = !cocok;
+      if (cocok && pertama===null) pertama=o;
+    }
+  }
+  const cur = levelSel.selectedOptions[0];
+  if (!cur || cur.dataset.pilar !== p){ if (pertama) pertama.selected = true; }
+}
+pilarSel.addEventListener('change', filterLevel);
+filterLevel();
+</script>
+{% endblock %}

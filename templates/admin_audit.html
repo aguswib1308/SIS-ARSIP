@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Log Audit{% endblock %}
+{% block content %}
+<div class="page-head"><h1>Log Audit</h1></div>
+<div class="card">
+  <div class="table-responsive">
+    <table class="table table-sm mb-0">
+      <thead class="table-light"><tr><th>Waktu</th><th>Pengguna</th><th>Aksi</th><th>Objek</th><th>Keterangan</th></tr></thead>
+      <tbody>
+      {% for r in rows %}
+        <tr><td class="small">{{ r.waktu[:19] }}</td><td class="small">{{ r.nama or '—' }}</td>
+          <td class="small">{{ r.aksi }}</td><td class="small">{{ r.objek }}{{ ' #' ~ r.objek_id if r.objek_id }}</td>
+          <td class="small">{{ r.keterangan or '' }}</td></tr>
+      {% else %}<tr><td colspan="5" class="text-muted small">Belum ada catatan audit.</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

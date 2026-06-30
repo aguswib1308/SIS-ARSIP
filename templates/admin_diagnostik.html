@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Diagnostik{% endblock %}
+{% block content %}
+<div class="page-head"><h1>Diagnostik Sistem</h1></div>
+<div class="row g-3">
+  <div class="col-lg-6">
+    <div class="card p-3">
+      <h2 style="font-size:1rem;">Pustaka ekstraksi teks / OCR</h2>
+      <table class="table table-sm mb-0">
+        {% for nama, ada in ingest_lib.items() %}
+        <tr><td>{{ nama }}</td><td>{% if ada %}<span class="text-success"><i class="bi bi-check-circle"></i> tersedia</span>
+          {% else %}<span class="text-muted"><i class="bi bi-dash-circle"></i> tidak ada (opsional)</span>{% endif %}</td></tr>
+        {% endfor %}
+      </table>
+      <p class="text-muted small mt-2 mb-0">Bila kosong, dokumen tetap tersimpan & dapat dicari via teks manual.</p>
+    </div>
+  </div>
+  <div class="col-lg-6">
+    <div class="card p-3">
+      <h2 style="font-size:1rem;">AI & pengaturan</h2>
+      <table class="table table-sm mb-0">
+        <tr><td>LLM gateway</td><td>{% if llm %}<span class="text-success"><i class="bi bi-check-circle"></i> aktif ({{ model }})</span>
+          {% else %}<span class="text-muted"><i class="bi bi-dash-circle"></i> nonaktif (set ARSIP_LLM_BASE_URL & ARSIP_LLM_API_KEY)</span>{% endif %}</td></tr>
+        <tr><td>Ambang reminder</td><td>H-{{ reminder }}</td></tr>
+      </table>
+      <p class="text-muted small mt-2 mb-0">Pencarian & arsip berjalan tanpa LLM; analisis konflik otomatis & jawaban RAG butuh LLM aktif (gagal anggun bila tidak).</p>
+    </div>
+  </div>
+</div>
+{% endblock %}

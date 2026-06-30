@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block title %}Dokumen{% endblock %}
+{% block content %}
+<div class="page-head">
+  <h1>Arsip Dokumen</h1>
+  {% if peran_user in ['admin','pengurus'] %}
+  <a href="{{ url_for('dokumen_baru') }}" class="btn btn-hijau"><i class="bi bi-plus-lg"></i> Dokumen baru</a>
+  {% endif %}
+</div>
+
+<form class="card p-3 mb-3" method="get">
+  <div class="row g-2 align-items-end">
+    <div class="col-lg-4">
+      <label class="form-label small mb-1">Pencarian (judul, nomor, isi teks, tag)</label>
+      <input name="q" value="{{ q }}" class="form-control" placeholder="mis. murabahah, ketenagakerjaan, izin">
+    </div>
+    <div class="col-6 col-lg-2">
+      <label class="form-label small mb-1">Pilar</label>
+      <select name="pilar" class="form-select">
+        <option value="">Semua</option>
+        {% for p in ['Syariah','Hukum Positif','Internal'] %}<option {{ 'selected' if f_pilar==p }}>{{ p }}</option>{% endfor %}
+      </select>
+    </div>
+    <div class="col-6 col-lg-2">
+      <label class="form-label small mb-1">Entitas</label>
+      <select name="entitas" class="form-select">
+        <option value="">Semua</option>
+        {% for e in ['Baitul Tamwil','Baitul Maal','Umum'] %}<option {{ 'selected' if f_entitas==e }}>{{ e }}</option>{% endfor %}
+      </select>
+    </div>
+    <div class="col-6 col-lg-2">
+      <label class="form-label small mb-1">Status</label>
+      <select name="status" class="form-select">
+        <option value="">Semua</option>
+        {% for s in ['Draf','Berlaku','Diubah','Dicabut','Diganti','Kedaluwarsa'] %}<option {{ 'selected' if f_status==s }}>{{ s }}</option>{% endfor %}
+      </select>
+    </div>
+    <div class="col-6 col-lg-2 d-grid">
+      <button class="btn btn-hijau"><i class="bi bi-search"></i> Cari</button>
+    </div>
+  </div>
+</form>
+
+{% if rows %}
+<div class="card">
+  <div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
+      <thead class="table-light">
+        <tr><th>Judul</th><th>Nomor</th><th>Jenis</th><th>Pilar / Entitas</th><th>Status</th></tr>
+      </thead>
+      <tbody>
+        {% for r in rows %}
+        <tr>
+          <td>
+            <a href="{{ url_for('dokumen_detail', dok_id=r.id) }}" class="fw-semibold">{{ r.judul }}</a>
+            {% if r.perlu_verifikasi %}<span class="badge bg-warning text-dark ms-1" title="Nomor/data perlu diverifikasi">perlu verifikasi</span>{% endif %}
+          </td>
+          <td class="small">{{ r.nomor or '—' }}<br><span class="text-muted">{{ r.tahun or '' }}</span></td>
+          <td class="small">{{ level_nama.get(r.level_kode, r.level_kode) }}</td>
+          <td><span class="pilar-pill">{{ r.pilar }}</span> <span class="ent-pill">{{ r.entitas }}</span></td>
+          <td><span class="st st-{{ r.status.lower().replace(' ','-') }}">{{ r.status }}</span></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+<p class="text-muted small mt-2">{{ rows|length }} dokumen.</p>
+{% else %}
+<div class="empty"><i class="bi bi-inbox"></i><p class="mt-2">Tidak ada dokumen yang cocok dengan filter.</p></div>
+{% endif %}
+{% endblock %}

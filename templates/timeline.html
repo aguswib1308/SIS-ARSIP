@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}Timeline{% endblock %}
+{% block content %}
+<div class="page-head">
+  <h1>Timeline Interaktif Peraturan</h1>
+  <a href="{{ url_for('hal_hierarki') }}" class="btn btn-outline-secondary"><i class="bi bi-diagram-3"></i> Lihat Hierarki</a>
+</div>
+<p class="text-muted">Sumbu waktu berdasarkan tahun penetapan. Geser/zoom (scroll), kelompok per pilar. Klik item untuk membuka dokumen. Warna = status.</p>
+
+<div class="mb-2 small">
+  <span class="st st-berlaku">Berlaku</span>
+  <span class="st st-diubah">Diubah</span>
+  <span class="st st-dicabut">Dicabut</span>
+  <span class="st st-diganti">Diganti</span>
+  <span class="st st-draf">Draf</span>
+</div>
+
+<div id="timeline" style="min-height:480px;"></div>
+<div id="fallback" class="empty d-none">
+  <i class="bi bi-wifi-off"></i>
+  <p class="mt-2">Pustaka timeline gagal dimuat (perlu internet untuk CDN vis-timeline).<br>
+  Silakan gunakan halaman <a href="{{ url_for('hal_hierarki') }}">Hierarki</a> atau <a href="{{ url_for('dokumen_list') }}">Daftar Dokumen</a>.</p>
+</div>
+{% endblock %}
+{% block scripts %}
+<link href="https://cdn.jsdelivr.net/npm/vis-timeline@7.7.3/styles/vis-timeline-graph2d.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/vis-timeline@7.7.3/standalone/umd/vis-timeline-graph2d.min.js"></script>
+<script>
+(async function(){
+  const cont = document.getElementById('timeline');
+  if (typeof vis === 'undefined'){
+    cont.classList.add('d-none');
+    document.getElementById('fallback').classList.remove('d-none');
+    return;
+  }
+  try{
+    const res = await fetch("{{ url_for('api_timeline') }}");
+    const data = await res.json();
+    if (!data.items.length){
+      cont.innerHTML = '<div class="empty"><i class="bi bi-inbox"></i><p class="mt-2">Belum ada dokumen bertahun untuk ditampilkan.</p></div>';
+      return;
+    }
+    const items = new vis.DataSet(data.items);
+    const groups = new vis.DataSet(data.groups);
+    const timeline = new vis.Timeline(cont, items, groups, {
+      stack:true, zoomKey:'ctrlKey', orientation:'top',
+      margin:{item:8}, tooltip:{followMouse:true}
+    });
+    timeline.on('select', function(props){
+      if (props.items.length){ window.location = '/dokumen/' + props.items[0]; }
+    });
+  }catch(e){
+    cont.classList.add('d-none');
+    document.getElementById('fallback').classList.remove('d-none');
+  }
+})();
+</script>
+{% endblock %}

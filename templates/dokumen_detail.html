@@ -1,0 +1,168 @@
+{% extends "base.html" %}
+{% block title %}{{ dok.judul }}{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <a href="{{ url_for('dokumen_list') }}" class="text-muted small"><i class="bi bi-arrow-left"></i> Daftar dokumen</a>
+    <h1 class="mt-1">{{ dok.judul }}</h1>
+    <div class="mt-1">
+      <span class="pilar-pill">{{ dok.pilar }}</span>
+      <span class="ent-pill">{{ dok.entitas }}</span>
+      <span class="st st-{{ dok.status.lower().replace(' ','-') }}">{{ dok.status }}</span>
+      {% if dok.perlu_verifikasi %}<span class="badge bg-warning text-dark">perlu verifikasi</span>{% endif %}
+    </div>
+  </div>
+  {% if peran_user in ['admin','pengurus'] %}
+  <div class="d-flex gap-2">
+    <a href="{{ url_for('dokumen_edit', dok_id=dok.id) }}" class="btn btn-outline-secondary"><i class="bi bi-pencil"></i> Edit</a>
+    <form method="post" action="{{ url_for('dokumen_hapus', dok_id=dok.id) }}"
+          onsubmit="return confirm('Pindahkan dokumen ini ke arsip terhapus?');">
+      <button class="btn btn-outline-danger"><i class="bi bi-trash"></i> Hapus</button>
+    </form>
+  </div>
+  {% endif %}
+</div>
+
+<div class="row g-3">
+  <div class="col-lg-7">
+    <div class="card p-3 mb-3">
+      <h2 style="font-size:1rem;">Metadata</h2>
+      <dl class="kv mb-0">
+        <dt>Level hierarki</dt><dd>{{ level_nama.get(dok.level_kode, dok.level_kode) }}</dd>
+        <dt>Nomor</dt><dd>{{ dok.nomor or '—' }}</dd>
+        <dt>Tahun</dt><dd>{{ dok.tahun or '—' }}</dd>
+        <dt>Otoritas</dt><dd>{{ dok.otoritas or '—' }}</dd>
+        <dt>Bentuk</dt><dd>{{ dok.bentuk or '—' }} {% if dok.bentuk_singkat %}({{ dok.bentuk_singkat }}){% endif %}</dd>
+        <dt>Penetapan</dt><dd>{{ dok.tgl_penetapan or '—' }}</dd>
+        <dt>Mulai berlaku</dt><dd>{{ dok.tgl_mulai_berlaku or '—' }}</dd>
+        <dt>Berakhir</dt><dd>{{ dok.tgl_berakhir or '—' }}</dd>
+        <dt>Bidang hukum</dt><dd>{{ dok.bidang_hukum or '—' }}</dd>
+        <dt>Tag</dt><dd>{{ dok.tag or '—' }}</dd>
+        <dt>Sumber</dt><dd>{% if dok.sumber %}<a href="{{ dok.sumber }}" target="_blank" rel="noopener">{{ dok.sumber }}</a>{% else %}—{% endif %}</dd>
+      </dl>
+      {% if dok.abstraksi %}
+      <div class="mt-3">
+        <h3 style="font-size:.9rem;">Abstraksi {% if dok.abstraksi_oleh_ai %}<span class="badge bg-info text-dark">dibuat AI</span>{% endif %}</h3>
+        <p class="mb-0 small">{{ dok.abstraksi }}</p>
+      </div>
+      {% endif %}
+    </div>
+
+    <div class="card p-3 mb-3">
+      <div class="d-flex justify-content-between align-items-center">
+        <h2 style="font-size:1rem;" class="mb-0">Teks dokumen</h2>
+        {% if teks %}<span class="badge bg-light text-dark">{{ teks.metode or '—' }} · {{ teks.status_ekstraksi }}</span>{% endif %}
+      </div>
+      {% if teks and teks.teks %}
+        <pre class="mt-2 small" style="white-space:pre-wrap;max-height:280px;overflow:auto;background:#fafbfb;padding:.75rem;border-radius:8px;">{{ teks.teks[:4000] }}{% if teks.teks|length > 4000 %}…{% endif %}</pre>
+      {% else %}
+        <p class="text-muted small mt-2 mb-2">Teks belum tersedia (ekstraksi tertunda atau belum ada lampiran).</p>
+      {% endif %}
+      {% if peran_user in ['admin','pengurus'] %}
+      <details class="mt-1">
+        <summary class="small text-muted" style="cursor:pointer;">Isi / koreksi teks manual</summary>
+        <form method="post" action="{{ url_for('dokumen_teks_manual', dok_id=dok.id) }}" class="mt-2">
+          <textarea name="teks" class="form-control small" rows="5">{{ teks.teks if teks else '' }}</textarea>
+          <button class="btn btn-sm btn-hijau mt-2">Simpan teks</button>
+        </form>
+      </details>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="col-lg-5">
+    <div class="card p-3 mb-3">
+      <h2 style="font-size:1rem;">Lampiran & versi</h2>
+      {% if versi %}
+      <ul class="list-unstyled mb-0">
+        {% for v in versi %}
+        <li class="d-flex justify-content-between align-items-center py-1 border-bottom">
+          <span><a href="{{ url_for('unduh_file', versi_id=v.id) }}" target="_blank"><i class="bi bi-file-earmark-text"></i> {{ v.nama_file }}</a>
+            <span class="badge bg-light text-dark">v{{ v.versi }}</span></span>
+          <small class="text-muted">{{ v.diunggah_pada[:10] }}</small>
+        </li>
+        {% endfor %}
+      </ul>
+      {% else %}<p class="text-muted small mb-0">Belum ada lampiran.</p>{% endif %}
+    </div>
+
+    <div class="card p-3 mb-3">
+      <h2 style="font-size:1rem;">Relasi dokumen</h2>
+      {% if relasi or relasi_balik %}
+      <ul class="list-unstyled mb-2">
+        {% for r in relasi %}
+        <li class="py-1">Dokumen ini <strong>{{ r.tipe_relasi }}</strong>
+          <a href="{{ url_for('dokumen_detail', dok_id=r.dok_id) }}">{{ r.judul }}</a>
+          {% if peran_user in ['admin','pengurus'] %}
+          <form method="post" action="{{ url_for('relasi_hapus', rid=r.id) }}" class="d-inline">
+            <button class="btn btn-sm btn-link text-danger p-0" title="hapus relasi">&times;</button></form>{% endif %}
+        </li>
+        {% endfor %}
+        {% for r in relasi_balik %}
+        <li class="py-1 text-muted"><a href="{{ url_for('dokumen_detail', dok_id=r.dok_id) }}">{{ r.judul }}</a>
+          <strong>{{ r.tipe_relasi }}</strong> dokumen ini</li>
+        {% endfor %}
+      </ul>
+      {% else %}<p class="text-muted small">Belum ada relasi.</p>{% endif %}
+      {% if peran_user in ['admin','pengurus'] %}
+      <details>
+        <summary class="small text-muted" style="cursor:pointer;">+ Tambah relasi</summary>
+        <form method="post" action="{{ url_for('relasi_tambah', dok_id=dok.id) }}" class="mt-2">
+          <div class="input-group input-group-sm mb-2">
+            <select name="tipe_relasi" class="form-select">
+              {% for t in ['mencabut','mengubah','mengganti','melaksanakan','mendasari'] %}<option>{{ t }}</option>{% endfor %}
+            </select>
+            <select name="dokumen_b" class="form-select">
+              {% for s in semua %}<option value="{{ s.id }}">{{ s.judul[:50] }}</option>{% endfor %}
+            </select>
+          </div>
+          <button class="btn btn-sm btn-hijau">Tambah</button>
+        </form>
+      </details>
+      {% endif %}
+    </div>
+
+    <div class="card p-3">
+      <h2 style="font-size:1rem;"><i class="bi bi-flag"></i> Pemeriksaan konflik</h2>
+      {% if peran_user in ['admin','pengurus'] %}
+      <form method="post" action="{{ url_for('periksa_konflik', dok_id=dok.id) }}" class="mb-2">
+        <label class="form-label small mb-1">Bandingkan dengan (analisis AI):</label>
+        <div class="input-group input-group-sm">
+          <select name="dokumen_lawan" class="form-select">
+            {% for s in semua %}<option value="{{ s.id }}">{{ s.judul[:50] }}</option>{% endfor %}
+          </select>
+          <button class="btn btn-hijau" {{ '' if llm_aktif else 'disabled title="LLM belum dikonfigurasi"' }}>Periksa</button>
+        </div>
+        {% if not llm_aktif %}<p class="text-muted small mt-1 mb-0">Analisis AI nonaktif (LLM belum dikonfigurasi). Gunakan flag manual.</p>{% endif %}
+      </form>
+      <details>
+        <summary class="small text-muted" style="cursor:pointer;">+ Flag manual</summary>
+        <form method="post" action="{{ url_for('flag_manual', dok_id=dok.id) }}" class="mt-2">
+          <textarea name="ringkasan" class="form-control form-control-sm mb-1" rows="2" placeholder="Ringkasan dugaan konflik" required></textarea>
+          <div class="input-group input-group-sm">
+            <select name="dokumen_lawan" class="form-select"><option value="">(tanpa pembanding)</option>
+              {% for s in semua %}<option value="{{ s.id }}">{{ s.judul[:40] }}</option>{% endfor %}</select>
+            <select name="keyakinan" class="form-select"><option>rendah</option><option selected>sedang</option><option>tinggi</option></select>
+            <button class="btn btn-outline-secondary">Buat</button>
+          </div>
+        </form>
+      </details>
+      {% endif %}
+      {% if flags %}
+      <hr class="my-2">
+      {% for f in flags %}
+      <div class="snip mb-2">
+        <div class="d-flex justify-content-between">
+          <strong class="small">{{ f.ringkasan }}</strong>
+          <span class="st st-{{ 'dicabut' if f.status=='Valid' else ('berlaku' if f.status=='Bukan konflik' else 'diubah') }}">{{ f.status }}</span>
+        </div>
+        <div class="small text-muted">sumber: {{ f.sumber_flag }} · keyakinan: {{ f.keyakinan or '—' }}</div>
+        <a class="small" href="{{ url_for('flag_list') }}">tinjau di daftar flag →</a>
+      </div>
+      {% endfor %}
+      {% endif %}
+      <p class="disclaimer mb-0">Flag bersifat <strong>indikatif</strong> untuk ditinjau manusia (DPS/pengurus), bukan putusan hukum/fatwa final.</p>
+    </div>
+  </div>
+</div>
+{% endblock %}

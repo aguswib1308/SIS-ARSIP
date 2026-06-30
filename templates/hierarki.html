@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block title %}Hierarki{% endblock %}
+{% macro level_block(level) %}
+  <div class="level-row">
+    <div class="lvl-nama">{{ level.nama }}</div>
+    {% if level.dokumen %}
+      {% for d in level.dokumen %}
+      <a class="dok-link" href="{{ url_for('dokumen_detail', dok_id=d.id) }}">
+        <span class="st st-{{ d.status.lower().replace(' ','-') }}" style="font-size:.62rem;">&nbsp;</span>
+        {{ d.nomor + ' — ' if d.nomor else '' }}{{ d.judul }}
+      </a>
+      {% endfor %}
+    {% else %}
+      <span class="level-kosong">(belum ada dokumen)</span>
+    {% endif %}
+  </div>
+{% endmacro %}
+{% block content %}
+<div class="page-head">
+  <h1>Hierarki Peraturan — Dua Pilar</h1>
+  <a href="{{ url_for('hal_timeline') }}" class="btn btn-outline-secondary"><i class="bi bi-clock-history"></i> Lihat Timeline</a>
+</div>
+<p class="text-muted">Pilar Syariah & Pilar Hukum Positif sama-sama mengikat peraturan internal BMT, yang bercabang ke dua badan hukum. Warna titik = status. Klik dokumen untuk detail.</p>
+
+<div class="row g-3 mb-3">
+  <div class="col-lg-6">
+    <div class="pilar-col">
+      <h3><i class="bi bi-moon-stars"></i> Pilar Syariah (Muamalah)</h3>
+      {% for level in bagan['Syariah'] %}{{ level_block(level) }}{% endfor %}
+    </div>
+  </div>
+  <div class="col-lg-6">
+    <div class="pilar-col">
+      <h3><i class="bi bi-bank"></i> Pilar Hukum Positif NKRI</h3>
+      {% for level in bagan['Hukum Positif'] %}{{ level_block(level) }}{% endfor %}
+    </div>
+  </div>
+</div>
+
+<div class="text-center my-3"><i class="bi bi-arrow-down-circle" style="font-size:1.5rem;color:var(--hijau);"></i></div>
+<div class="payung mb-3">BMT AMAL MUSLIM (payung) — keduanya mengikat aturan internal</div>
+
+<div class="row g-3">
+  <div class="col-lg-6">
+    <div class="cabang-card">
+      <h4 style="color:var(--hijau-tua);"><i class="bi bi-briefcase"></i> Baitul Tamwil — Badan Hukum Koperasi (KSPPS)</h4>
+      <p class="text-muted small mb-2">Dasar: UU Perkoperasian, Permenkop, UU LKM/P2SK, POJK.</p>
+      {% for level in bagan['Internal'] %}
+        {% set ada = level.dokumen|selectattr('entitas','in',['Baitul Tamwil','Umum'])|list %}
+        <div class="level-row">
+          <div class="lvl-nama">{{ level.nama }}</div>
+          {% for d in ada %}<a class="dok-link" href="{{ url_for('dokumen_detail', dok_id=d.id) }}">
+            <span class="st st-{{ d.status.lower().replace(' ','-') }}" style="font-size:.62rem;">&nbsp;</span>
+            {{ d.judul }} {% if d.entitas=='Umum' %}<span class="ent-pill">Umum</span>{% endif %}</a>
+          {% else %}<span class="level-kosong">(belum ada)</span>{% endfor %}
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+  <div class="col-lg-6">
+    <div class="cabang-card">
+      <h4 style="color:var(--hijau-tua);"><i class="bi bi-heart"></i> Baitul Maal — Badan Hukum LAZ MKU (cabang ULAZ MKU Amal Muslim)</h4>
+      <p class="text-muted small mb-2">Dasar: UU Pengelolaan Zakat, Kemenag/BAZNAS, regulasi LAZ MKU pusat.</p>
+      {% for level in bagan['Internal'] %}
+        {% set ada = level.dokumen|selectattr('entitas','in',['Baitul Maal','Umum'])|list %}
+        <div class="level-row">
+          <div class="lvl-nama">{{ level.nama }}</div>
+          {% for d in ada %}<a class="dok-link" href="{{ url_for('dokumen_detail', dok_id=d.id) }}">
+            <span class="st st-{{ d.status.lower().replace(' ','-') }}" style="font-size:.62rem;">&nbsp;</span>
+            {{ d.judul }} {% if d.entitas=='Umum' %}<span class="ent-pill">Umum</span>{% endif %}</a>
+          {% else %}<span class="level-kosong">(belum ada)</span>{% endfor %}
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+<p class="text-muted small mt-3"><i class="bi bi-info-circle"></i> Regulasi ketenagakerjaan & dokumen ber-entitas "Umum" tampil di kedua cabang karena mengikat keduanya.</p>
+{% endblock %}
