@@ -86,14 +86,60 @@ def _panggil_llm(system, user):
                     {"role": "user", "content": user},
                 ],
                 "temperature": 0.2,
+                "stream": False,
             },
             timeout=config.LLM_TIMEOUT,
         )
         resp.raise_for_status()
-        data = resp.json()
-        return data["choices"][0]["message"]["content"], None
+        konten = _ambil_konten(resp.text)
+        if konten:
+            return konten, None
+        return None, "Respons LLM tidak dapat dibaca."
     except Exception as e:  # gagal anggun
         return None, f"Gagal menghubungi LLM: {e}"
+
+
+def _ambil_konten(teks):
+    """Ambil isi jawaban dari respons gateway. Tahan terhadap JSON tunggal,
+    multi-objek/JSON-lines, maupun streaming SSE ('data: {...}')."""
+    teks = (teks or "").strip()
+    if not teks:
+        return None
+
+    # 1) Streaming SSE: gabungkan delta tiap baris 'data: {...}'
+    if teks.startswith("data:"):
+        potongan = []
+        for baris in teks.splitlines():
+            baris = baris.strip()
+            if not baris.startswith("data:"):
+                continue
+            isi = baris[5:].strip()
+            if isi == "[DONE]":
+                break
+            try:
+                obj = json.loads(isi)
+                ch = (obj.get("choices") or [{}])[0]
+                delta = (ch.get("delta") or {}).get("content") or \
+                        (ch.get("message") or {}).get("content")
+                if delta:
+                    potongan.append(delta)
+            except Exception:
+                continue
+        if potongan:
+            return "".join(potongan)
+
+    # 2) JSON tunggal, atau objek pertama bila ada 'extra data' di belakang
+    try:
+        obj = json.loads(teks)
+    except json.JSONDecodeError:
+        try:
+            obj, _ = json.JSONDecoder().raw_decode(teks)
+        except Exception:
+            return None
+    try:
+        return obj["choices"][0]["message"]["content"]
+    except (KeyError, IndexError, TypeError):
+        return None
 
 
 SYS_ASISTEN = (
