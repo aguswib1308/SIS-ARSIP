@@ -6,8 +6,8 @@
     <a href="{{ url_for('dokumen_list') }}" class="text-muted small"><i class="bi bi-arrow-left"></i> Daftar dokumen</a>
     <h1 class="mt-1">{{ dok.judul }}</h1>
     <div class="mt-1">
-      <span class="pilar-pill">{{ dok.pilar }}</span>
-      <span class="ent-pill">{{ dok.entitas }}</span>
+      <span class="pilar-pill pp-{{ kelas_pilar(dok.pilar) }}">{{ dok.pilar }}</span>
+      <span class="ent-pill ent-{{ kelas_entitas(dok.entitas) }}">{{ dok.entitas }}</span>
       <span class="st st-{{ dok.status.lower().replace(' ','-') }}">{{ dok.status }}</span>
       {% if dok.perlu_verifikasi %}<span class="badge bg-warning text-dark">perlu verifikasi</span>{% endif %}
     </div>

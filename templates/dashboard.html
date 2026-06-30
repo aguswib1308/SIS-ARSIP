@@ -7,17 +7,35 @@
 </div>
 
 <div class="row g-3 mb-3">
-  <div class="col-6 col-lg-3"><div class="card card-stat p-3"><div class="angka">{{ d.total }}</div><div class="label">Total dokumen aktif</div></div></div>
-  <div class="col-6 col-lg-3"><div class="card card-stat p-3"><div class="angka">{{ d.per_status.get('Berlaku', 0) }}</div><div class="label">Berstatus berlaku</div></div></div>
   <div class="col-6 col-lg-3">
-    <div class="card card-stat p-3">
-      <div class="angka {{ 'text-danger' if d.izin_jumlah }}">{{ d.izin_jumlah }}</div>
+    <div class="kpi k-biru reveal h-100">
+      <div class="d-flex justify-content-between align-items-start mb-2">
+        <span class="kpi-ico"><i class="bi bi-folder2-open"></i></span></div>
+      <div class="angka" data-count="{{ d.total }}">0</div>
+      <div class="label">Total dokumen aktif</div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="kpi k-hijau reveal h-100">
+      <div class="d-flex justify-content-between align-items-start mb-2">
+        <span class="kpi-ico"><i class="bi bi-patch-check"></i></span></div>
+      <div class="angka" data-count="{{ d.per_status.get('Berlaku', 0) }}">0</div>
+      <div class="label">Berstatus berlaku</div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="kpi {{ 'k-merah' if d.izin_jumlah else 'k-teal' }} reveal h-100">
+      <div class="d-flex justify-content-between align-items-start mb-2">
+        <span class="kpi-ico"><i class="bi bi-hourglass-split"></i></span></div>
+      <div class="angka" data-count="{{ d.izin_jumlah }}">0</div>
       <div class="label">Izin perlu perhatian (H-{{ d.reminder_hari }})</div>
     </div>
   </div>
   <div class="col-6 col-lg-3">
-    <div class="card card-stat p-3">
-      <div class="angka {{ 'text-warning' if d.flag_terbuka }}">{{ d.flag_terbuka }}</div>
+    <div class="kpi {{ 'k-oranye' if d.flag_terbuka else 'k-ungu' }} reveal h-100">
+      <div class="d-flex justify-content-between align-items-start mb-2">
+        <span class="kpi-ico"><i class="bi bi-flag"></i></span></div>
+      <div class="angka" data-count="{{ d.flag_terbuka }}">0</div>
       <div class="label">Flag konflik terbuka</div>
     </div>
   </div>
@@ -25,7 +43,7 @@
 
 <div class="row g-3">
   <div class="col-lg-7">
-    <div class="card p-3 mb-3">
+    <div class="card card-glow reveal p-3 mb-3">
       <h2 style="font-size:1.05rem;"><i class="bi bi-exclamation-triangle text-danger"></i> Izin & legalitas mendekati / lewat masa berlaku</h2>
       {% if d.izin %}
       <div class="table-responsive">
@@ -49,7 +67,7 @@
       {% endif %}
     </div>
 
-    <div class="card p-3">
+    <div class="card card-glow reveal p-3">
       <h2 style="font-size:1.05rem;"><i class="bi bi-clock-history"></i> Dokumen terbaru</h2>
       <ul class="list-unstyled mb-0">
         {% for t in d.terbaru %}
@@ -61,24 +79,24 @@
   </div>
 
   <div class="col-lg-5">
-    <div class="card p-3 mb-3">
+    <div class="card card-glow reveal p-3 mb-3">
       <h2 style="font-size:1.05rem;">Sebaran per pilar</h2>
       {% for pilar in ['Syariah','Hukum Positif','Internal'] %}
       <div class="d-flex justify-content-between py-1 border-bottom">
-        <span><span class="pilar-pill">{{ pilar }}</span></span>
+        <span><span class="pilar-pill pp-{{ kelas_pilar(pilar) }}">{{ pilar }}</span></span>
         <strong>{{ d.per_pilar.get(pilar, 0) }}</strong>
       </div>
       {% endfor %}
     </div>
-    <div class="card p-3 mb-3">
+    <div class="card card-glow reveal p-3 mb-3">
       <h2 style="font-size:1.05rem;">Sebaran per entitas</h2>
       {% for ent in ['Baitul Tamwil','Baitul Maal','Umum'] %}
       <div class="d-flex justify-content-between py-1 border-bottom">
-        <span class="ent-pill">{{ ent }}</span><strong>{{ d.per_entitas.get(ent, 0) }}</strong>
+        <span class="ent-pill ent-{{ kelas_entitas(ent) }}">{{ ent }}</span><strong>{{ d.per_entitas.get(ent, 0) }}</strong>
       </div>
       {% endfor %}
     </div>
-    <div class="card p-3">
+    <div class="card card-glow reveal p-3">
       <h2 style="font-size:1.05rem;">Sebaran per status</h2>
       {% for s, c in d.per_status.items() %}
       <div class="d-flex justify-content-between py-1 border-bottom">

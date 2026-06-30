@@ -46,6 +46,35 @@ def role_required(*peran):
     return deco
 
 
+# Warna aksen per-menu (semantik: tiap area punya hue bermakna, bukan gradient asal).
+ACCENT_PER_ENDPOINT = {
+    "dashboard": "#0f6e52",          # hijau — ringkasan
+    "dokumen_list": "#1f6feb",       # biru — arsip dokumen
+    "dokumen_detail": "#1f6feb",
+    "dokumen_baru": "#1f6feb",
+    "dokumen_edit": "#1f6feb",
+    "hal_hierarki": "#4f46e5",       # indigo — hierarki
+    "hal_timeline": "#0d8a8a",       # teal — timeline
+    "asisten": "#7c3aed",            # violet — AI
+    "flag_list": "#c2410c",          # oranye-bata — konflik
+    "notifikasi": "#0f6e52",
+    "admin_pengguna": "#475569",     # slate — admin
+    "admin_audit": "#475569",
+    "admin_diagnostik": "#475569",
+}
+
+
+def kelas_pilar(p):
+    return {"Syariah": "syariah", "Hukum Positif": "hukum", "Internal": "internal"}.get(p, "internal")
+
+
+def kelas_entitas(e):
+    return {"Baitul Tamwil": "tamwil", "Baitul Maal": "maal", "Umum": "umum"}.get(e, "umum")
+
+
+app.jinja_env.globals.update(kelas_pilar=kelas_pilar, kelas_entitas=kelas_entitas)
+
+
 @app.context_processor
 def inject_global():
     n = 0
@@ -56,8 +85,10 @@ def inject_global():
                 (session["user_id"],)).fetchone()["c"]
         except Exception:
             n = 0
+    accent = ACCENT_PER_ENDPOINT.get(request.endpoint, "#0f6e52")
     return {"notif_count": n, "nama_user": session.get("nama"),
-            "peran_user": session.get("peran"), "llm_aktif": config.llm_aktif()}
+            "peran_user": session.get("peran"), "llm_aktif": config.llm_aktif(),
+            "accent": accent}
 
 
 @app.route("/login", methods=["GET", "POST"])

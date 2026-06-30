@@ -24,13 +24,13 @@
 
 <div class="row g-3 mb-3">
   <div class="col-lg-6">
-    <div class="pilar-col">
+    <div class="pilar-col col-syariah reveal">
       <h3><i class="bi bi-moon-stars"></i> Pilar Syariah (Muamalah)</h3>
       {% for level in bagan['Syariah'] %}{{ level_block(level) }}{% endfor %}
     </div>
   </div>
   <div class="col-lg-6">
-    <div class="pilar-col">
+    <div class="pilar-col col-hukum reveal">
       <h3><i class="bi bi-bank"></i> Pilar Hukum Positif NKRI</h3>
       {% for level in bagan['Hukum Positif'] %}{{ level_block(level) }}{% endfor %}
     </div>
@@ -42,8 +42,8 @@
 
 <div class="row g-3">
   <div class="col-lg-6">
-    <div class="cabang-card">
-      <h4 style="color:var(--hijau-tua);"><i class="bi bi-briefcase"></i> Baitul Tamwil — Badan Hukum Koperasi (KSPPS)</h4>
+    <div class="cabang-card cab-tamwil reveal">
+      <h4 style="color:#1456b8;"><i class="bi bi-briefcase"></i> Baitul Tamwil — Badan Hukum Koperasi (KSPPS)</h4>
       <p class="text-muted small mb-2">Dasar: UU Perkoperasian, Permenkop, UU LKM/P2SK, POJK.</p>
       {% for level in bagan['Internal'] %}
         {% set ada = level.dokumen|selectattr('entitas','in',['Baitul Tamwil','Umum'])|list %}
@@ -58,8 +58,8 @@
     </div>
   </div>
   <div class="col-lg-6">
-    <div class="cabang-card">
-      <h4 style="color:var(--hijau-tua);"><i class="bi bi-heart"></i> Baitul Maal — Badan Hukum LAZ MKU (cabang ULAZ MKU Amal Muslim)</h4>
+    <div class="cabang-card cab-maal reveal">
+      <h4 style="color:#9d174d;"><i class="bi bi-heart"></i> Baitul Maal — Badan Hukum LAZ MKU (cabang ULAZ MKU Amal Muslim)</h4>
       <p class="text-muted small mb-2">Dasar: UU Pengelolaan Zakat, Kemenag/BAZNAS, regulasi LAZ MKU pusat.</p>
       {% for level in bagan['Internal'] %}
         {% set ada = level.dokumen|selectattr('entitas','in',['Baitul Maal','Umum'])|list %}

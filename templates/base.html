@@ -65,7 +65,7 @@
 </nav>
 {% endif %}
 
-<main id="konten" class="container-fluid px-3 px-lg-4 py-4">
+<main id="konten" class="container-fluid px-3 px-lg-4 py-4" style="--accent: {{ accent }};">
   {% with messages = get_flashed_messages(with_categories=true) %}
     {% for cat, msg in messages %}
       <div class="alert alert-{{ cat }} alert-dismissible fade show" role="alert">{{ msg }}
@@ -80,6 +80,58 @@
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+// Interaktivitas ringan tanpa dependensi. Hormati prefers-reduced-motion.
+(function(){
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // 1. Scroll-reveal bertahap untuk elemen .reveal
+  const reveals = document.querySelectorAll('.reveal');
+  if (reduce || !('IntersectionObserver' in window)) {
+    reveals.forEach(el => el.classList.add('in'));
+  } else {
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((e, i) => {
+        if (e.isIntersecting) { e.target.style.transitionDelay = (e.target.dataset.delay || '0ms');
+          e.target.classList.add('in'); io.unobserve(e.target); }
+      });
+    }, { threshold: 0.12 });
+    reveals.forEach((el, i) => { el.dataset.delay = (i % 8) * 55 + 'ms'; io.observe(el); });
+  }
+
+  // 2. Count-up angka [data-count]
+  const nums = document.querySelectorAll('[data-count]');
+  const animateNum = (el) => {
+    const target = parseFloat(el.dataset.count) || 0;
+    if (reduce) { el.textContent = target; return; }
+    const dur = 900; const t0 = performance.now();
+    const step = (t) => {
+      const p = Math.min(1, (t - t0) / dur);
+      const eased = 1 - Math.pow(1 - p, 3);
+      el.textContent = Math.round(target * eased);
+      if (p < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  };
+  if ('IntersectionObserver' in window) {
+    const io2 = new IntersectionObserver((entries) => {
+      entries.forEach(e => { if (e.isIntersecting) { animateNum(e.target); io2.unobserve(e.target); } });
+    }, { threshold: 0.5 });
+    nums.forEach(el => io2.observe(el));
+  } else { nums.forEach(animateNum); }
+
+  // 3. Spotlight mengikuti kursor pada kartu .card-glow
+  if (!reduce) {
+    document.querySelectorAll('.card-glow').forEach(card => {
+      card.addEventListener('pointermove', (ev) => {
+        const r = card.getBoundingClientRect();
+        card.style.setProperty('--mx', (ev.clientX - r.left) + 'px');
+        card.style.setProperty('--my', (ev.clientY - r.top) + 'px');
+      });
+    });
+  }
+})();
+</script>
 {% block scripts %}{% endblock %}
 </body>
 </html>
