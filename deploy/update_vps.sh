@@ -6,6 +6,7 @@ APP_DIR=/var/www/sis-arsip
 cd $APP_DIR
 
 echo "=== 1. Tarik kode terbaru dari GitHub ==="
+git config --global --add safe.directory $APP_DIR 2>/dev/null || true
 git pull origin main
 
 echo "=== 2. Update dependencies ==="
