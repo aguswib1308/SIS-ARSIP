@@ -6,6 +6,8 @@ After=network.target
 User=www-data
 Group=www-data
 WorkingDirectory=/var/www/sis-arsip
+# HOME ke folder app (www-data) agar gunicorn control-server tak gagal tulis ke /var/www.
+Environment=HOME=/var/www/sis-arsip
 # Rahasia (SECRET_KEY, kredensial LLM) dibaca dari file env mode 0600.
 EnvironmentFile=/etc/sis-arsip.env
 ExecStart=/var/www/sis-arsip/venv/bin/gunicorn \
